@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"online-subscribe-rest-service/internal/entity"
 
@@ -17,7 +18,7 @@ func NewSubscriptionRepo(db *pgx.Conn) *SubscriptionRepo {
 	return &SubscriptionRepo{db: db}
 }
 
-func (r *SubscriptionRepo) Create(ctx context.Context, s entity.Subscription) (uuid.UUID, error) {
+func (r *SubscriptionRepo) CreateSubscription(ctx context.Context, s entity.Subscription) (uuid.UUID, error) {
 
 	id := uuid.Must(uuid.NewV4())
 
@@ -35,7 +36,7 @@ func (r *SubscriptionRepo) Create(ctx context.Context, s entity.Subscription) (u
 	return id, nil
 }
 
-func (r *SubscriptionRepo) Update(ctx context.Context, s entity.Subscription) error {
+func (r *SubscriptionRepo) UpdateSubscription(ctx context.Context, s entity.Subscription) error {
 
 	query := `
 	UPDATE subscriptions
@@ -56,7 +57,7 @@ func (r *SubscriptionRepo) Update(ctx context.Context, s entity.Subscription) er
 	return nil
 }
 
-func (r *SubscriptionRepo) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *SubscriptionRepo) DeleteSubscription(ctx context.Context, id uuid.UUID) error {
 
 	query := `
 DELETE FROM subscriptions 
@@ -72,7 +73,7 @@ WHERE id = $1
 	return nil
 }
 
-func (r *SubscriptionRepo) SubscriptionByID(ctx context.Context, id uuid.UUID) (string, error) {
+func (r *SubscriptionRepo) SubscriptionByID(ctx context.Context, id uuid.UUID) (entity.Subscription, error) {
 
 	query := `
 	SELECT id, service_name, price, user_id, start_date, end_date
@@ -90,10 +91,14 @@ func (r *SubscriptionRepo) SubscriptionByID(ctx context.Context, id uuid.UUID) (
 		&subscription.EndDate)
 
 	if err != nil {
-		return "", fmt.Errorf("repository: SubscriptionByID: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return entity.Subscription{}, entity.ErrNotFound
+		}
+
+		return entity.Subscription{}, fmt.Errorf("repository: SubscriptionByID: %w", err)
 	}
 
-	return subscription.ServiceName, err
+	return subscription, nil
 }
 
 func (r *SubscriptionRepo) SubscriptionsList(ctx context.Context, userID uuid.UUID) ([]entity.Subscription, error) {
@@ -136,4 +141,3 @@ func (r *SubscriptionRepo) SubscriptionsList(ctx context.Context, userID uuid.UU
 	return subscriptions, nil
 
 }
-
