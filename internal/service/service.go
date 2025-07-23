@@ -14,6 +14,7 @@ type Repo interface {
 	CreateSubscription(context.Context, entity.Subscription) (uuid.UUID, error)
 	DeleteSubscription(context.Context, uuid.UUID) error
 	SubscriptionsList(context.Context, uuid.UUID) ([]entity.Subscription, error)
+	SubscriptionsSum(ctx context.Context, params entity.SubscriptionsSumParams) (entity.UserSubscriptionsSum, error)
 }
 
 type Service struct {
@@ -75,4 +76,13 @@ func (s *Service) SubscriptionsList(ctx context.Context, userID uuid.UUID) ([]en
 
 	return subs, nil
 
+}
+
+func (s *Service) SubscriptionsSum(ctx context.Context, params entity.SubscriptionsSumParams) (entity.UserSubscriptionsSum, error) {
+	subSum, err := s.repo.SubscriptionsSum(ctx, params)
+	if err != nil {
+		return entity.UserSubscriptionsSum{}, fmt.Errorf("failed to get subscriptions sum %w", err)
+	}
+
+	return subSum, nil
 }

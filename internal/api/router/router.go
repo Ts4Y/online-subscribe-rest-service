@@ -15,6 +15,6 @@ func NewRouter(h *handler.Handler) http.Handler {
 	r.Post("/subscriptions", h.CreateSubscription)
 	r.Put("/subscriptions", h.UpdateSubscription)
 	r.Delete("/subscriptions/{id}", h.DeleteSubscription)
-
+	r.Get("/subscriptions/sum", h.SubscriptionsSum)
 	return r
 }

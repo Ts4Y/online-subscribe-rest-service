@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"online-subscribe-rest-service/internal/entity"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 )
@@ -139,5 +140,37 @@ func (r *SubscriptionRepo) SubscriptionsList(ctx context.Context, userID uuid.UU
 	}
 
 	return subscriptions, nil
+
+}
+
+func (r *SubscriptionRepo) SubscriptionsSum(ctx context.Context, params entity.SubscriptionsSumParams) (entity.UserSubscriptionsSum, error) {
+	query := sq.Select("user_id, sum(price)").PlaceholderFormat(sq.Dollar).
+		From("subscriptions").
+		Where(sq.Eq{"user_id": params.UserID}).
+		Where(sq.Eq{"service_name": params.ServiceName}).
+		Where(sq.GtOrEq{"start_date": params.StartDate}).
+		GroupBy("user_id")
+
+	if params.EndDate != nil {
+		query = query.Where(sq.LtOrEq{"end_date": params.EndDate})
+	} 
+
+	sqlQuery, args, err := query.ToSql()
+	if err != nil {
+		return entity.UserSubscriptionsSum{}, fmt.Errorf("repository: SubscriptionsSum: %w", err)
+	}
+
+	var sum entity.UserSubscriptionsSum
+
+	err = r.db.QueryRow(ctx, sqlQuery, args...).Scan(&sum.UserID, &sum.TotalPrice)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return entity.UserSubscriptionsSum{}, entity.ErrNotFound
+		}
+
+		return entity.UserSubscriptionsSum{}, fmt.Errorf("repository: SubscriptionsSum: %w", err)
+	}
+
+	return sum, nil
 
 }
