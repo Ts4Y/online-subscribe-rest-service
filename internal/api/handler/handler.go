@@ -15,6 +15,9 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
+// @title Subscriptions api docs
+// @description REST API for managing subscriptions
+
 type SubscriptionsService interface {
 	SubscriptionByID(context.Context, uuid.UUID) (entity.Subscription, error)
 	SubscriptionsList(context.Context, uuid.UUID) ([]entity.Subscription, error)
@@ -36,6 +39,16 @@ func NewHandler(log logger.Logger, subscriptionsService SubscriptionsService) *H
 	}
 }
 
+
+// @Summary Get all subscriptions by user_id
+// @Description Возвращает список подписок по user_id
+// @Tags Subscriptions
+// @Param user_id path string true "User ID (UUID)"
+// @Success 200 {array} entity.Subscription
+// @Failure 400 {string} string "Invalid user_id"
+// @Failure 404 {string} string "Subscriptions not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router       /users/{user_id}/subscriptions [get]
 func (h *Handler) SubscriptionsList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -71,6 +84,15 @@ func (h *Handler) SubscriptionsList(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Get subscription by ID
+// @Description Возвращает одну подписку по её ID
+// @Tags Subscriptions
+// @Param id path string true "Subscription ID (UUID)"
+// @Success 200 {object} entity.Subscription
+// @Failure 400 {string} string "Invalid subscription ID"
+// @Failure 404 {string} string "Subscription not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router       /subscriptions/{id} [get]
 func (h *Handler) SubscriptionByID(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -106,6 +128,16 @@ func (h *Handler) SubscriptionByID(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Create subscription
+// @Description Создаёт новую подписку
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param subscription body entity.Subscription true "Subscription payload"
+// @Success 200 {string} string "Subscription created (ID)"
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 500 {string} string "Internal server error"
+// @Router       /subscriptions [post]
 func (h *Handler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -142,6 +174,17 @@ func (h *Handler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Update subscription
+// @Description Обновляет существующую подписку
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param subscription body entity.Subscription true "Subscription payload"
+// @Success 200 {object} entity.Subscription
+// @Failure 400 {string} string "Invalid request body"
+// @Failure 404 {string} string "Subscription not found"
+// @Failure 500 {string} string "Internal server error"
+// @Router       /subscriptions [put]
 func (h *Handler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -175,6 +218,14 @@ func (h *Handler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Delete subscription
+// @Description Удаляет подписку по её ID
+// @Tags Subscriptions
+// @Param id path string true "Subscription ID (UUID)"
+// @Success 200 {string} string "Subscription successfully deleted"
+// @Failure 400 {string} string "Invalid subscription ID"
+// @Failure 500 {string} string "Internal server error"
+// @Router       /subscriptions/{id} [delete]
 func (h *Handler) DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -202,6 +253,19 @@ func (h *Handler) DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Get total subscription cost
+// @Description Подсчитывает суммарную стоимость подписок за период с фильтрами
+// @Tags Subscriptions
+// @Accept json
+// @Produce json
+// @Param user_id query string true "User ID (UUID)"
+// @Param service_name query string true "Service name"
+// @Param start_date query string true "Start date (YYYY-MM-DD)"
+// @Param end_date query string false "End date (YYYY-MM-DD)"
+// @Success 200 {object} entity.UserSubscriptionsSum
+// @Failure 400 {string} string "Invalid or missing parameters"
+// @Failure 500 {string} string "Internal server error"
+// @Router       /subscriptions/sum [get]
 func (h *Handler) SubscriptionsSum(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

@@ -1,0 +1,219 @@
+definitions:
+  entity.Subscription:
+    properties:
+      end_date:
+        type: string
+      id:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  entity.UserSubscriptionsSum:
+    properties:
+      total_price:
+        type: integer
+      user_id:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: REST API for managing subscriptions
+  title: Subscriptions api docs
+paths:
+  /subscriptions:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новую подписку
+      parameters:
+      - description: Subscription payload
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Subscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription created (ID)
+          schema:
+            type: string
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create subscription
+      tags:
+      - Subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующую подписку
+      parameters:
+      - description: Subscription payload
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Subscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Subscription'
+        "400":
+          description: Invalid request body
+          schema:
+            type: string
+        "404":
+          description: Subscription not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update subscription
+      tags:
+      - Subscriptions
+  /subscriptions/{id}:
+    delete:
+      description: Удаляет подписку по её ID
+      parameters:
+      - description: Subscription ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Subscription successfully deleted
+          schema:
+            type: string
+        "400":
+          description: Invalid subscription ID
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete subscription
+      tags:
+      - Subscriptions
+    get:
+      description: Возвращает одну подписку по её ID
+      parameters:
+      - description: Subscription ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Subscription'
+        "400":
+          description: Invalid subscription ID
+          schema:
+            type: string
+        "404":
+          description: Subscription not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get subscription by ID
+      tags:
+      - Subscriptions
+  /subscriptions/sum:
+    get:
+      consumes:
+      - application/json
+      description: Подсчитывает суммарную стоимость подписок за период с фильтрами
+      parameters:
+      - description: User ID (UUID)
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: Service name
+        in: query
+        name: service_name
+        required: true
+        type: string
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserSubscriptionsSum'
+        "400":
+          description: Invalid or missing parameters
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get total subscription cost
+      tags:
+      - Subscriptions
+  /users/{user_id}/subscriptions:
+    get:
+      description: Возвращает список подписок по user_id
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Subscription'
+            type: array
+        "400":
+          description: Invalid user_id
+          schema:
+            type: string
+        "404":
+          description: Subscriptions not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get all subscriptions by user_id
+      tags:
+      - Subscriptions
+swagger: "2.0"
