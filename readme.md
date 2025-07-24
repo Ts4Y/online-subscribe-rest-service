@@ -5,17 +5,15 @@
 
 ---
 
-## 🚀 Быстрый старт
-
 ### 🔧 Зависимости:
 - [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
 - `make` (для Unix-систем или Git Bash на Windows)
 
 ### ⚙️ Запуск:
 
 ```bash
 make app-start
+```
 
 ## 🔗 Эндпоинты и их назначение
 
